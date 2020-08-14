@@ -34,8 +34,8 @@ esp_err_t Encoder::Install(gpio_num_t gpioA, gpio_num_t gpioB,
 	ESP_ERROR_CHECK_RETURN(pcnt_set_filter_value(pcntUnit, _pcntFilter));
 	ESP_ERROR_CHECK_RETURN(pcnt_filter_enable(pcntUnit));
 
-	ESP_ERROR_CHECK(pcnt_event_enable(pcntUnit, PCNT_EVT_H_LIM));
-	ESP_ERROR_CHECK(pcnt_event_enable(pcntUnit, PCNT_EVT_L_LIM));
+	ESP_ERROR_CHECK_RETURN(pcnt_event_enable(pcntUnit, PCNT_EVT_H_LIM));
+	ESP_ERROR_CHECK_RETURN(pcnt_event_enable(pcntUnit, PCNT_EVT_L_LIM));
 
 	esp_err_t ret = pcnt_isr_service_install(ESP_INTR_FLAG_LEVEL1);
 	if (ret != ESP_ERR_INVALID_STATE && ret != ESP_OK)
@@ -43,7 +43,7 @@ esp_err_t Encoder::Install(gpio_num_t gpioA, gpio_num_t gpioB,
 
 	ESP_ERROR_CHECK_RETURN(pcnt_isr_handler_add(pcntUnit, isr_handler, this));
 
-	ESP_ERROR_CHECK(pcnt_intr_enable(pcntUnit));
+	ESP_ERROR_CHECK_RETURN(pcnt_intr_enable(pcntUnit));
 
 	ESP_ERROR_CHECK_RETURN(pcnt_counter_clear(pcntUnit));
 
