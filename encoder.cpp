@@ -16,6 +16,9 @@ esp_err_t Encoder::Install(gpio_num_t gpioA, gpio_num_t gpioB,
 {
 	_unit = pcntUnit;
 
+
+	// channel A
+
 	pcnt_config_t pcnt_config = {
 			.pulse_gpio_num = gpioA,
 			.ctrl_gpio_num = gpioB,
@@ -31,8 +34,25 @@ esp_err_t Encoder::Install(gpio_num_t gpioA, gpio_num_t gpioB,
 
 	ESP_ERROR_CHECK_RETURN(pcnt_unit_config(&pcnt_config));
 
+
+	// channel B
+
+	pcnt_config.pulse_gpio_num = gpioB;
+	pcnt_config.ctrl_gpio_num = gpioA;
+	pcnt_config.pos_mode = PCNT_COUNT_DEC;
+	pcnt_config.neg_mode = PCNT_COUNT_INC;
+	pcnt_config.channel = PCNT_CHANNEL_1;
+
+	ESP_ERROR_CHECK_RETURN(pcnt_unit_config(&pcnt_config));
+
+
+	// filter
+
 	ESP_ERROR_CHECK_RETURN(pcnt_set_filter_value(pcntUnit, _pcntFilter));
 	ESP_ERROR_CHECK_RETURN(pcnt_filter_enable(pcntUnit));
+
+
+	// interrupts
 
 	ESP_ERROR_CHECK_RETURN(pcnt_event_enable(pcntUnit, PCNT_EVT_H_LIM));
 	ESP_ERROR_CHECK_RETURN(pcnt_event_enable(pcntUnit, PCNT_EVT_L_LIM));
@@ -42,8 +62,10 @@ esp_err_t Encoder::Install(gpio_num_t gpioA, gpio_num_t gpioB,
 		return ret;
 
 	ESP_ERROR_CHECK_RETURN(pcnt_isr_handler_add(pcntUnit, isr_handler, this));
-
 	ESP_ERROR_CHECK_RETURN(pcnt_intr_enable(pcntUnit));
+
+
+	// start
 
 	ESP_ERROR_CHECK_RETURN(pcnt_counter_clear(pcntUnit));
 
